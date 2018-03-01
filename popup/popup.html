@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=utf-8>
+    <title>Basic Screenshot</title>
+    <link rel="stylesheet" href="../popup.css">
+</head>
+<body>
+<div id="wrap">
+    <div id="loading">
+        <div class="loader">
+            <div class="bar" id="bar"></div>
+        </div>
+        <div class="clr">
+            <br>
+            <p>
+                Screen capture in progress, your finished image will open in a
+                new window once completed. Please wait for the progress bar to
+                finish.
+            </p>
+        </div>
+    </div>
+    <div id="split-image" class="warning">
+        Note: your page is too large for the Chrome browser to capture as
+        one image. It will be split into <span id="screenshot-count">multiple</span>
+        images.
+    </div>
+    <div id="invalid" class="error">
+        Full Page Screen Capture cannot be run on this type of URL
+        because of Google Chrome Web Store policies. Try
+        another page on the web.
+    </div>
+    <div id="uh-oh" class="error">
+        Uh oh, something went wrong! Try reloading the page,
+        verifying javascript is enabled,
+        and running this again.
+        <br><br>
+    </div>
+</div>
+
+<script src="config.js"></script>
+<script src="utils.js"></script>
+<script src="screenshot-api.js"></script>
+<script src="fetch-client-details-api.js"></script>
+<script src="popup.js"></script>
+</body>
+</html>
