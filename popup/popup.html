@@ -3,7 +3,7 @@
 <head>
     <meta charset=utf-8>
     <title>Basic Screenshot</title>
-    <link rel="stylesheet" href="../popup.css">
+    <link rel="stylesheet" href="popup.css">
 </head>
 <body>
 <div id="wrap">
@@ -11,12 +11,10 @@
         <div class="loader">
             <div class="bar" id="bar"></div>
         </div>
-        <div class="clr">
+        <div class="clr" id="clr">
             <br>
             <p>
-                Screen capture in progress, your finished image will open in a
-                new window once completed. Please wait for the progress bar to
-                finish.
+                In progress. You'll get notified once the image was sent.
             </p>
         </div>
     </div>
@@ -25,16 +23,21 @@
         one image. It will be split into <span id="screenshot-count">multiple</span>
         images.
     </div>
-    <div id="invalid" class="error">
-        Full Page Screen Capture cannot be run on this type of URL
-        because of Google Chrome Web Store policies. Try
-        another page on the web.
-    </div>
     <div id="uh-oh" class="error">
         Uh oh, something went wrong! Try reloading the page,
         verifying javascript is enabled,
         and running this again.
         <br><br>
+    </div>
+    <div id="sent">
+        Finished the process. The image was sent!
+        <p>
+            <img class="fireworks" src="../resources/fireworks.gif">
+        </p>
+    </div>
+    <div id="failed-sending" class="error">
+        Failed sending :/
+        Check the provided URL
     </div>
 </div>
 

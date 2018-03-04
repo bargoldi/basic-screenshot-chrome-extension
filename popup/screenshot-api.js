@@ -1,29 +1,24 @@
 window.ScreenshotAPI = (function () {
-	var MAX_PRIMARY_DIMENSION = 15000 * 2,
-		MAX_SECONDARY_DIMENSION = 4000 * 2,
-		MAX_AREA = MAX_PRIMARY_DIMENSION * MAX_SECONDARY_DIMENSION;
+	var MAX_AREA = config.maxPrimaryDimension * config.maxSecondaryDimension;
 
-	var matches = ['http://*/*', 'https://*/*', 'ftp://*/*', 'file://*/*'],
-		noMatches = [/^https?:\/\/chrome.google.com\/.*$/];
+	var matches = ['http://*/*', 'https://*/*', 'ftp://*/*', 'file://*/*'];
+	var noMatches = [/^https?:\/\/chrome.google.com\/.*$/];
 
 	function takeScreenshot(tab, callback, errorCallback, progress, splitNotifier) {
-		var loaded = false,
-			screenshots = [],
-			timedOut = false,
-			noop = function () {
-			};
+		var loaded = false;
+		var screenshots = [];
+		var timedOut = false;
 
 		callback = callback || noop;
 		errorCallback = errorCallback || noop;
 		progress = progress || noop;
 
-		if (!_isValidUrl(tab.url)) {
+		if (!isValidURL(tab.url, matches, noMatches)) {
 			errorCallback('invalid url');
 		}
 
 		chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 			if (request.msg === 'capture') {
-				// progress(request.complete);
 				_capture(request, screenshots, sendResponse, splitNotifier);
 
 				return true;
@@ -62,6 +57,19 @@ window.ScreenshotAPI = (function () {
 
 	function _initiateCapture(tab, callback) {
 		chrome.tabs.sendMessage(tab.id, {msg: 'scrollPage'}, callback);
+	}
+
+	function _capture(data, screenshots, sendResponse, splitNotifier) {
+		chrome.tabs.captureVisibleTab(
+			null, {format: 'png', quality: 100}, function (dataURI) {
+				if (dataURI) {
+					var image = new Image();
+
+					image.onload = _setImageProperties(data, image, screenshots, splitNotifier, sendResponse);
+
+					image.src = dataURI;
+				}
+			});
 	}
 
 	function _setImageProperties(data, image, screenshots, splitNotifier, sendResponse) {
@@ -113,19 +121,6 @@ window.ScreenshotAPI = (function () {
 		};
 	}
 
-	function _capture(data, screenshots, sendResponse, splitNotifier) {
-		chrome.tabs.captureVisibleTab(
-			null, {format: 'png', quality: 100}, function (dataURI) {
-				if (dataURI) {
-					var image = new Image();
-
-					image.onload = _setImageProperties(data, image, screenshots, splitNotifier, sendResponse);
-
-					image.src = dataURI;
-				}
-			});
-	}
-
 	function _initScreenshots(totalWidth, totalHeight) {
 		// Create and return an array of screenshot objects based
 		// on the `totalWidth` and `totalHeight` of the final image.
@@ -135,9 +130,9 @@ window.ScreenshotAPI = (function () {
 		var badSize = _isBadSize(totalHeight, totalWidth);
 		var biggerWidth = totalWidth > totalHeight;
 		var maxWidth = (!badSize ? totalWidth :
-			(biggerWidth ? MAX_PRIMARY_DIMENSION : MAX_SECONDARY_DIMENSION));
+			(biggerWidth ? config.maxPrimaryDimension : config.maxSecondaryDimension));
 		var maxHeight = (!badSize ? totalHeight :
-			(biggerWidth ? MAX_SECONDARY_DIMENSION : MAX_PRIMARY_DIMENSION));
+			(biggerWidth ? config.maxSecondaryDimension : config.maxPrimaryDimension));
 		var numCols = Math.ceil(totalWidth / maxWidth);
 		var numRows = Math.ceil(totalHeight / maxHeight);
 		var row;
@@ -179,42 +174,22 @@ window.ScreenshotAPI = (function () {
 	}
 
 	function _isBadSize(totalHeight, totalWidth) {
-		return (totalHeight > MAX_PRIMARY_DIMENSION ||
-			totalWidth > MAX_PRIMARY_DIMENSION ||
+		return (totalHeight > config.maxPrimaryDimension ||
+			totalWidth > config.maxPrimaryDimension ||
 			totalHeight * totalWidth > MAX_AREA);
 	}
 
 	function _filterScreenshots(imgLeft, imgTop, imgWidth, imgHeight, screenshots) {
 		// Filter down the screenshots to ones that match the location
 		// of the given image.
-		var imgRight = imgLeft + imgWidth,
-			imgBottom = imgTop + imgHeight;
+		var imgRight = imgLeft + imgWidth;
+		var imgBottom = imgTop + imgHeight;
+
 		return screenshots.filter(function (screenshot) {
 			return (imgLeft < screenshot.right &&
 				imgRight > screenshot.left &&
 				imgTop < screenshot.bottom &&
 				imgBottom > screenshot.top);
 		});
-	}
-
-	function _isValidUrl(url) {
-		for (var i = noMatches.length - 1; i >= 0; i--) {
-			if (noMatches[i].test(url)) {
-
-				return false;
-			}
-		}
-
-		var urlRegex;
-
-		for (var j = matches.length - 1; j >= 0; j--) {
-			urlRegex = new RegExp('^' + matches[j].replace(/\*/g, '.*') + '$');
-			if (urlRegex.test(url)) {
-
-				return true;
-			}
-		}
-
-		return false;
 	}
 })();

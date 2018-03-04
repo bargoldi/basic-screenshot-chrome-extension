@@ -71,14 +71,30 @@ p {
     color: #aa8d3b;
     font-style: italic;
     font-weight: bold;
+    text-align: center;
 }
 
 .error {
     margin-top: 1em;
     font-weight: bold;
     color: #b33;
+    text-align: center;
 }
 
 .error a {
     color: #f75;
+}
+
+#sent {
+    font-size: 23px;
+    color: limegreen;
+    text-align: center;
+    font-weight: bold;
+    line-height: 23px;
+}
+
+.fireworks {
+    position: relative;
+    width: 100px;
+    height: 100px;
 }
